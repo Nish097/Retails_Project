@@ -2,7 +2,7 @@
 
 use cancer
 
-select * from RetailSales_Analysis
+
 
 
 
@@ -88,9 +88,35 @@ SELECT DISTINCT category FROM RetailSales_Analysis
 
 
 
+
+select * from RetailSales_Analysis
+
  -- Q.1 Write a SQL query to retrieve all columns for sales made on '2022-11-05
 
 select * from RetailSales_Analysis
 where sale_date='5/11/2022'
 
+
+-- Q.2 Write a SQL query to retrieve all transactions where the category is 'Clothing' and the quantity sold is more than 4 in the month of Nov-2022
+
+select * from RetailSales_Analysis
+where category='Clothing'
+and quantiy >=4 
+--and format(CAST(sale_date as date), 'mm-yyyy') = '00-2022'
+and month(sale_date)='11' and year(sale_date)='2022'
+
+
+
+/** select sale_date from RetailSales_Analysis
+
+
+with cte as
+(
+select format(CAST(sale_date as date), 'mm/yyyy') as date from RetailSales_Analysis
+ where format(CAST(sale_date as date), 'mm-yyyy') = '00-2023'
+where category='Clothing'
+and quantiy >=4 ) 
+
+select * from cte
+where date = '11-2022'**/
 
