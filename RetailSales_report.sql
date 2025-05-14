@@ -102,7 +102,6 @@ where sale_date='5/11/2022'
 select * from RetailSales_Analysis
 where category='Clothing'
 and quantiy >=4 
---and format(CAST(sale_date as date), 'mm-yyyy') = '00-2022'
 and month(sale_date)='11' and year(sale_date)='2022'
 
 
@@ -119,4 +118,111 @@ and quantiy >=4 )
 
 select * from cte
 where date = '11-2022'**/
+
+
+--Q.3 Write a SQL query to calculate the total sales (total_sale) for each category.
+
+select sum(cast(total_sale as float)) as net_sales , category
+from RetailSales_Analysis
+group by category
+
+-- Q.4 Write a SQL query to find the average age of customers who purchased items from the 'Beauty' category.
+
+select avg(cast(age as int)) as cust_age 
+from RetailSales_Analysis
+where category='Beauty'
+
+
+-- Q.5 Write a SQL query to find all transactions where the total_sale is greater than 1000.
+
+select * from RetailSales_Analysis
+where total_sale >1000
+
+
+-- Q.6 Write a SQL query to find the total number of transactions (transaction_id) made by each gender in each category.
+
+select sum(cast(transactions_id as int)) as total_trans,
+gender, category
+from RetailSales_Analysis
+group by gender, category
+
+
+-- Q.7 Write a SQL query to calculate the average sale for each month. Find out best selling month in each year.
+with bestselling as (
+                      select avg(cast(total_sale as float)) as avg_sale,
+                      year(sale_date) as years, month(sale_date) as months
+                      from RetailSales_Analysis
+                      group by month(sale_date), year(sale_date)
+					  ),
+					 RANKTOPSALE as (
+					                  select *,
+					                 rank() over (partition by years order by avg_sale desc) as topmonth
+									 from bestselling
+									 )
+									  select years ,months,
+									  round(avg_sale ,2)
+									  from RANKTOPSALE 
+									  where topmonth=1
+
+
+-- Q.8 Write a SQL query to find the top 5 customers based on the highest total sale
+
+    -- 1st method
+
+	 select top 5 customer_id,
+	 sum(cast(total_sale as int)) as net_sale
+	 from RetailSales_Analysis
+	 group by customer_id
+	 order by net_sale desc
+
+
+----2nd method
+
+	 with netSale as(
+	 select sum(cast(total_sale as int)) as net_sale,
+	 customer_id
+	 from RetailSales_Analysis
+	 group by customer_id
+	 ) ,
+	 rankcustomer as
+	 (
+	 select  *,
+	 rank() over(order by net_sale desc) as SalesRank
+	 from netSale
+	 )
+	 select customer_id,
+	 net_sale,
+	 SalesRank
+	 from rankcustomer
+	 where SalesRank<=5
+
+
+ -- Q.9 Write a SQL query to find the number of unique customers who purchased items from each category.
+
+ select count(distinct customer_id) as uniquecustomer, category
+ from RetailSales_Analysis
+ group by category
+
+
+-- Q.10 Write a SQL query to create each shift and number of orders (Example Morning <=12, Afternoon Between 12 & 17, Evening >17)
+
+
+with hourlysale as
+(
+  select 
+  case
+  when DATEPART(hour,sale_date) <=12 then 'Morning'
+  when DATEPART(hour,sale_date) between 12 and 17 then 'Afternoon'
+  else 'Evening'
+  end as shift
+  from RetailSales_Analysis
+  )
+  select
+  count(*) as total_orders
+  from hourlysale 
+  group by shift
+
+
+  ---- Project end-----
+  
 
